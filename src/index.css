@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FFFFFF;
+  --color-primary-text: #262626;
+  --color-secondary-text: #8E8E8E;
+  --color-divider: #DBDBDB;
+  --color-accent: #0095F6;
+  --color-sent-bubble: #0095F6;
+  --color-received-bubble: #EFEFEF;
+  --color-input-bg: #EFEFEF;
+  --color-online-green: #00C853;
+  --color-error: #ED4956;
+  --color-heart-red: #ED4956;
+  
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-primary-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input, textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+.story-ring {
+  background: linear-gradient(45deg, #FCAF45, #F77737, #F56040, #C13584, #833AB4);
+  padding: 2px;
+  border-radius: 50%;
+}
+
+.story-ring-inner {
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
