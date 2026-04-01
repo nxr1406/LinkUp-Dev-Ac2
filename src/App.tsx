@@ -24,6 +24,7 @@ import BlockedUsers from './pages/BlockedUsers';
 import Chat from './pages/Chat';
 import AdminVerification from './pages/AdminVerification';
 import AdminAppeals from './pages/AdminAppeals';
+import { UpdateDialog } from './components/UpdateDialog';
 
 function SuspendedScreen({ userData }: { userData: any }) {
   const [message, setMessage] = useState('');
@@ -180,6 +181,7 @@ export default function App() {
           <AnimatedRoutes />
         </Router>
         <Toaster position="top-center" />
+        <UpdateDialog />
       </AuthProvider>
     </ErrorBoundary>
   );
