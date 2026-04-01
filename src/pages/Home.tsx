@@ -43,8 +43,10 @@ export default function Home() {
         let otherUser = null;
         if (otherUserId) {
           const userSnap = await getDoc(doc(db, 'users', otherUserId));
-          if (userSnap.exists()) {
+          if (userSnap.exists() && (!userSnap.data().isSuspended || userData?.role === 'admin')) {
             otherUser = { id: userSnap.id, ...userSnap.data() };
+          } else {
+            otherUser = { id: otherUserId, fullName: 'LinkUp User', username: 'linkup_user', avatarUrl: null, isDeleted: true };
           }
         }
         return {

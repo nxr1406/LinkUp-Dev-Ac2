@@ -70,7 +70,7 @@ export default function Search() {
 
       const processSnapshot = (snapshot: any) => {
         snapshot.docs.forEach((doc: any) => {
-          if (doc.id !== currentUser.uid && !userData?.blockedUsers?.includes(doc.id)) {
+          if (doc.id !== currentUser.uid && !userData?.blockedUsers?.includes(doc.id) && (!doc.data().isSuspended || userData?.role === 'admin')) {
             usersMap.set(doc.id, { id: doc.id, ...doc.data() });
           }
         });
@@ -158,8 +158,10 @@ export default function Search() {
                   </p>
                   <p className="text-[13px] text-[#8E8E8E] flex items-center">
                     {user.username}
-                    {user.isVerified && (
-                      <BadgeCheck size={12} className="text-[#0095F6] ml-1 shrink-0" fill="#0095F6" color="white" />
+                    {user.isSuspended && (
+                      <span className="ml-2 text-[10px] bg-[#ED4956]/10 text-[#ED4956] px-2 py-0.5 rounded-full font-semibold">
+                        Suspended
+                      </span>
                     )}
                   </p>
                 </div>

@@ -28,7 +28,33 @@ body {
   -ms-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.3s, color 0.3s;
 }
+
+/* Dark Mode Overrides */
+html.dark body {
+  background-color: #000000;
+  color: #F5F5F5;
+}
+
+html.dark .bg-white { background-color: #000000 !important; }
+html.dark .text-\[\#262626\] { color: #F5F5F5 !important; }
+html.dark .bg-\[\#EFEFEF\] { background-color: #1A1A1A !important; }
+html.dark .bg-\[\#F5F5F5\] { background-color: #121212 !important; }
+html.dark .bg-\[\#FAFAFA\] { background-color: #000000 !important; }
+html.dark input.bg-\[\#FAFAFA\] { background-color: #121212 !important; }
+html.dark .border-\[\#DBDBDB\] { border-color: #262626 !important; }
+html.dark .text-\[\#8E8E8E\] { color: #A0A0A0 !important; }
+html.dark .placeholder-\[\#8E8E8E\]::placeholder { color: #A0A0A0 !important; }
+html.dark .text-\[\#00376B\] { color: #0095F6 !important; }
+html.dark .text-\[\#737373\] { color: #A0A0A0 !important; }
+html.dark .bg-\[\#DBDBDB\] { background-color: #262626 !important; }
+html.dark .border-\[\#262626\] { border-color: #F5F5F5 !important; }
+html.dark .bg-\[\#262626\] { background-color: #F5F5F5 !important; color: #000000 !important; }
+html.dark .bg-black\/5 { background-color: rgba(255, 255, 255, 0.1) !important; }
+html.dark .border-black\/20 { border-color: rgba(255, 255, 255, 0.2) !important; }
+html.dark .bg-black\/40 { background-color: rgba(255, 255, 255, 0.2) !important; }
+html.dark .bg-black\/50 { background-color: rgba(255, 255, 255, 0.2) !important; }
 
 input, textarea {
   -webkit-user-select: auto;

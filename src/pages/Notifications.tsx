@@ -34,8 +34,10 @@ export default function Notifications() {
         let fromUser = null;
         if (data.fromUserId) {
           const userSnap = await getDoc(doc(db, 'users', data.fromUserId));
-          if (userSnap.exists()) {
+          if (userSnap.exists() && (!userSnap.data().isSuspended || userData?.role === 'admin')) {
             fromUser = { id: userSnap.id, ...userSnap.data() };
+          } else {
+            fromUser = { id: data.fromUserId, fullName: 'LinkUp User', username: 'linkup_user', avatarUrl: null, isDeleted: true };
           }
         }
         return {

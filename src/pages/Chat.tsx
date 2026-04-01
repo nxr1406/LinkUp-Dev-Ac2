@@ -68,6 +68,31 @@ export default function Chat() {
     }
   };
 
+  const handleClearChat = async () => {
+    if (!chatId || !currentUser) return;
+    try {
+      const q = query(collection(db, `messages/${chatId}/msgs`));
+      const snapshot = await getDocs(q);
+      
+      const batch = writeBatch(db);
+      snapshot.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        if (!data.deletedFor?.includes(currentUser.uid)) {
+          batch.update(docSnap.ref, {
+            deletedFor: arrayUnion(currentUser.uid)
+          });
+        }
+      });
+      
+      await batch.commit();
+      setShowChatSettings(false);
+      toast.success('Chat cleared');
+    } catch (error) {
+      console.error('Error clearing chat:', error);
+      toast.error('Failed to clear chat');
+    }
+  };
+
   useEffect(() => {
     if (!currentUser || !chatId) return;
 
@@ -80,8 +105,10 @@ export default function Chat() {
           const otherId = data.participants.find((id: string) => id !== currentUser.uid);
           if (otherId) {
             const userUnsubscribe = onSnapshot(doc(db, 'users', otherId), (docSnap) => {
-              if (docSnap.exists()) {
+              if (docSnap.exists() && (!docSnap.data().isSuspended || userData?.role === 'admin')) {
                 setOtherUser({ id: docSnap.id, ...docSnap.data() });
+              } else {
+                setOtherUser({ id: otherId, fullName: 'LinkUp User', username: 'linkup_user', avatarUrl: null, isDeleted: true });
               }
             }, (error) => {
               handleFirestoreError(error, OperationType.GET, `users/${otherId}`);
@@ -320,6 +347,22 @@ export default function Chat() {
       isDeleted: true,
       content: 'This message was unsent'
     });
+    
+    try {
+      const repliesQuery = query(collection(db, `messages/${chatId}/msgs`), where('replyToId', '==', selectedMessage.id));
+      const repliesSnap = await getDocs(repliesQuery);
+      if (!repliesSnap.empty) {
+        const batch = writeBatch(db);
+        repliesSnap.docs.forEach(docSnap => {
+          batch.update(docSnap.ref, {
+            replyToText: 'This message was unsent'
+          });
+        });
+        await batch.commit();
+      }
+    } catch (error) {
+      console.error('Error updating replies:', error);
+    }
     
     // If this was the last message, update the chat's lastMessage
     const isLastMessage = messages.length > 0 && messages[messages.length - 1].id === selectedMessage.id;
@@ -571,7 +614,9 @@ export default function Chat() {
                             <BadgeCheck size={10} className="text-[#0095F6] ml-0.5 shrink-0" fill="#0095F6" color="white" />
                           )}
                         </span>
-                        <span className="text-[13px] opacity-90 truncate"><AppleEmojiText text={msg.replyToText} /></span>
+                        <span className={clsx("text-[13px] opacity-90 truncate", messages.find(m => m.id === msg.replyToId)?.isDeleted && "italic")}>
+                          <AppleEmojiText text={messages.find(m => m.id === msg.replyToId)?.isDeleted ? "This message was unsent" : msg.replyToText} />
+                        </span>
                       </div>
                     )}
                     
@@ -823,6 +868,12 @@ export default function Chat() {
                 className="w-full py-4 text-[15px] text-[#262626] font-semibold active:bg-gray-50 border-b border-[#DBDBDB]"
               >
                 Set Nickname
+              </button>
+              <button 
+                onClick={handleClearChat}
+                className="w-full py-4 text-[15px] text-[#ED4956] font-semibold active:bg-gray-50 border-b border-[#DBDBDB]"
+              >
+                Clear Chat
               </button>
               <button 
                 onClick={handleDeleteChat}

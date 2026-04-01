@@ -25,10 +25,10 @@ export default function BlockedUsers() {
         const usersData = await Promise.all(
           userData.blockedUsers.map(async (userId: string) => {
             const userDoc = await getDoc(doc(db, 'users', userId));
-            if (userDoc.exists()) {
+            if (userDoc.exists() && (!userDoc.data().isSuspended || userData?.role === 'admin')) {
               return { id: userDoc.id, ...userDoc.data() };
             }
-            return null;
+            return { id: userId, fullName: 'LinkUp User', username: 'linkup_user', avatarUrl: null, isDeleted: true };
           })
         );
         setBlockedUsers(usersData.filter(Boolean));

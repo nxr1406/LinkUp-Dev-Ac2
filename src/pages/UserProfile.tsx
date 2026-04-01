@@ -27,7 +27,7 @@ export default function UserProfile() {
     const fetchUser = async () => {
       try {
         const userDoc = await getDoc(doc(db, 'users', userId));
-        if (userDoc.exists()) {
+        if (userDoc.exists() && (!userDoc.data().isSuspended || userData?.role === 'admin')) {
           const data = userDoc.data();
           setProfileUser({ id: userDoc.id, ...data });
           
@@ -38,6 +38,8 @@ export default function UserProfile() {
               setIsFollowing(currentData.following?.includes(userId) || false);
             }
           }
+        } else {
+          setProfileUser({ id: userId, fullName: 'LinkUp User', username: 'linkup_user', avatarUrl: null, isDeleted: true });
         }
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -230,6 +232,12 @@ export default function UserProfile() {
               )}
             </h2>
             <p className="text-[15px] text-[#8E8E8E]">@{profileUser.username}</p>
+            
+            {profileUser.isSuspended && (
+              <div className="mt-2 px-3 py-1 bg-[#ED4956]/10 text-[#ED4956] text-[12px] font-semibold rounded-full">
+                Account Suspended
+              </div>
+            )}
             
             {profileUser.bio && (
               <p className="text-[15px] text-[#262626] text-center mt-3 px-8 whitespace-pre-wrap leading-relaxed">

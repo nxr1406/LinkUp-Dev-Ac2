@@ -4,10 +4,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { auth, db } from '../firebase';
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { collection, query, where, getDocs, doc, deleteDoc, updateDoc, setDoc, serverTimestamp, addDoc, writeBatch } from 'firebase/firestore';
-import { Menu, Plus, Bell, Lock, Download, LogOut, Trash2, X, Check, BadgeCheck, ShieldCheck, Settings, Database, Key } from 'lucide-react';
+import { Menu, Plus, Bell, Lock, Download, LogOut, Trash2, X, Check, BadgeCheck, ShieldCheck, ShieldAlert, Settings, Database, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import { uploadImageToCatbox } from '../services/catbox';
 import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
+import { clsx } from 'clsx';
 
 import { AppleEmojiText } from '../components/AppleEmojiText';
 
@@ -41,6 +42,21 @@ export default function Profile() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deletingChats, setDeletingChats] = useState(false);
   const [storageError, setStorageError] = useState('');
+
+  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+
+  const toggleDarkMode = () => {
+    const html = document.documentElement;
+    if (html.classList.contains('dark')) {
+      html.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setIsDarkMode(false);
+    } else {
+      html.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setIsDarkMode(true);
+    }
+  };
 
   const fetchStorageMetrics = async () => {
     try {
@@ -417,6 +433,22 @@ export default function Profile() {
                 <Lock size={24} className="text-[#262626] mr-3" strokeWidth={1.5} />
                 <span className="text-[15px] text-[#262626]">Blocked accounts</span>
               </button>
+              <div className="flex items-center justify-between px-4 py-3 active:bg-gray-50">
+                <div className="flex items-center">
+                  <Settings size={24} className="text-[#262626] mr-3" strokeWidth={1.5} />
+                  <span className="text-[15px] text-[#262626]">Dark Mode</span>
+                </div>
+                <button 
+                  onClick={toggleDarkMode}
+                  className="w-12 h-6 rounded-full bg-[#DBDBDB] relative transition-colors duration-300"
+                  style={{ backgroundColor: isDarkMode ? '#0095F6' : '#DBDBDB' }}
+                >
+                  <div className={clsx(
+                    "w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform duration-300",
+                    isDarkMode ? "translate-x-6" : "translate-x-0.5"
+                  )}></div>
+                </button>
+              </div>
               <button 
                 onClick={() => {
                   setShowMenu(false);
@@ -445,6 +477,13 @@ export default function Profile() {
                   >
                     <ShieldCheck size={24} className="text-[#0095F6] mr-3" strokeWidth={1.5} />
                     <span className="text-[15px] text-[#0095F6] font-semibold">Review Verifications</span>
+                  </button>
+                  <button 
+                    onClick={() => navigate('/app/admin/appeals')}
+                    className="flex items-center px-4 py-3 active:bg-gray-50"
+                  >
+                    <ShieldAlert size={24} className="text-[#0095F6] mr-3" strokeWidth={1.5} />
+                    <span className="text-[15px] text-[#0095F6] font-semibold">Suspension Appeals</span>
                   </button>
                   <button 
                     onClick={() => {
