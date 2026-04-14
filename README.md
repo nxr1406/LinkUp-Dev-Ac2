@@ -1,209 +1,155 @@
-# 🔔 Push Notification Backend
+# LinkUp — Notification Backend (FastAPI + FCM)
 
-A **lightweight, async FastAPI** service that delivers realtime push
-notifications to Flutter chat apps via **Firebase Cloud Messaging (FCM) v1**.
-
----
-
-## Folder Structure
-
-```
-project/
-├── .env.example          ← copy to .env and fill in your credentials
-└── backend/
-    ├── __init__.py
-    ├── server.py         ← FastAPI app & route definitions
-    ├── firebase.py       ← FCM HTTP v1 integration
-    ├── models.py         ← in-memory token registry
-    └── requirements.txt
-```
+Render.com-এ deploy করার জন্য FastAPI backend।
 
 ---
 
-## ⚙️ Setup
+## ফাইল স্ট্রাকচার
 
-### 1 — Clone / copy the project
-
-```bash
-cd project
 ```
+linkup-notification-backend/     ← এই ফোল্ডারটি GitHub-এ push করো
+  main.py                        ← FastAPI app
+  requirements.txt
+  render.yaml
 
-### 2 — Create a virtual environment
-
-```bash
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-```
-
-### 3 — Install dependencies
-
-```bash
-pip install -r backend/requirements.txt
-```
-
-### 4 — Configure Firebase credentials
-
-1. Open [Firebase Console](https://console.firebase.google.com) →
-   **Project Settings** → **Service accounts** → **Generate new private key**.
-2. Save the downloaded JSON file somewhere safe, e.g. `serviceAccountKey.json`.
-3. Copy `.env.example` to `.env` and fill in:
-
-```env
-GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/serviceAccountKey.json
-FCM_PROJECT_ID=your-firebase-project-id
+Flutter app-এ replace করো:
+  lib/main.dart                  ← main.dart (এই ফোল্ডার থেকে নাও)
+  lib/services/notification_service.dart
+  lib/services/chat_service.dart
 ```
 
 ---
 
-## 🚀 Run the Server
+## ধাপ ১ — pubspec.yaml-এ নতুন packages যোগ করো
 
-### Development (auto-reload)
-
-```bash
-uvicorn backend.server:app --reload --port 8000
+```yaml
+dependencies:
+  firebase_messaging: ^15.1.3   # ← যোগ করো
+  http: ^1.2.2                  # ← যোগ করো
+  # বাকি সব আগের মতো থাকবে
 ```
 
-### Production
-
+তারপর:
 ```bash
-uvicorn backend.server:app --host 0.0.0.0 --port 8000 --workers 4
-```
-
-Server will be live at **http://localhost:8000**
-
-Interactive API docs: **http://localhost:8000/docs**
-
----
-
-## 📡 API Reference
-
-### `GET /`  — Health check
-
-```bash
-curl http://localhost:8000/
-```
-
-**Response**
-
-```json
-{
-  "status": "ok",
-  "service": "push-notification-backend",
-  "registered_users": 3,
-  "registered_tokens": 5
-}
+flutter pub get
 ```
 
 ---
 
-### `POST /save-token`  — Register a device token
+## ধাপ ২ — AndroidManifest.xml-এ FCM permission যোগ করো
 
-Called by the Flutter app when FCM provides (or rotates) a device token.
+`android/app/src/main/AndroidManifest.xml` ফাইলে `<application>` ট্যাগের আগে যোগ করো:
 
-**Request**
-
-```bash
-curl -X POST http://localhost:8000/save-token \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "user_123",
-    "token": "eXaMpLeFcMtOkEn_abcdefghij1234567890"
-  }'
+```xml
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+<uses-permission android:name="android.permission.INTERNET"/>
 ```
 
-**Response**
+`<application>` ট্যাগের ভেতরে যোগ করো:
 
-```json
-{
-  "success": true,
-  "message": "Token saved successfully.",
-  "user_id": "user_123",
-  "total_tokens": 1
-}
+```xml
+<!-- FCM default channel -->
+<meta-data
+    android:name="com.google.firebase.messaging.default_notification_channel_id"
+    android:value="messages_channel" />
+
+<!-- FCM default icon -->
+<meta-data
+    android:name="com.google.firebase.messaging.default_notification_icon"
+    android:resource="@mipmap/ic_launcher" />
+
+<!-- FCM default color -->
+<meta-data
+    android:name="com.google.firebase.messaging.default_notification_color"
+    android:resource="@color/notification_color" />
 ```
 
----
-
-### `POST /send-notification`  — Push a notification
-
-Triggered by your chat backend when a new message arrives.
-
-**Request**
-
-```bash
-curl -X POST http://localhost:8000/send-notification \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "user_123",
-    "title": "Alice",
-    "body": "Hey, are you free tonight?",
-    "data": {
-      "chat_id": "chat_456",
-      "sender_id": "user_789",
-      "type": "new_message"
-    }
-  }'
-```
-
-**Response (all devices reached)**
-
-```json
-{
-  "success": true,
-  "message": "Notification delivered to 2/2 device(s).",
-  "total_sent": 2,
-  "total_failed": 0,
-  "results": [
-    { "token_preview": "eXaMpLeFcMtOkEn_ab…", "status": "success", "detail": null },
-    { "token_preview": "aNOtHeRtOkEn_xyz123…", "status": "success", "detail": null }
-  ]
-}
+`android/app/src/main/res/values/colors.xml` ফাইলে যোগ করো:
+```xml
+<color name="notification_color">#E91E8C</color>
 ```
 
 ---
 
-## Flutter Integration Snippet
+## ধাপ ৩ — Render.com-এ Deploy
+
+### ৩.১ GitHub Repository তৈরি করো
+`linkup-notification-backend/` ফোল্ডারটি একটি নতুন GitHub repo-তে push করো।
+
+### ৩.২ Render-এ Web Service তৈরি করো
+1. [render.com](https://render.com) → **New** → **Web Service**
+2. GitHub repo সংযুক্ত করো
+3. Settings:
+   - **Environment**: Python
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+### ৩.৩ Environment Variables সেট করো
+Render Dashboard → **Environment** ট্যাবে:
+
+| Key | Value |
+|-----|-------|
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | `linkup-c22fa-firebase-adminsdk-fbsvc-3993609a2d.json` ফাইলের সম্পূর্ণ JSON কনটেন্ট (এক লাইনে paste করো) |
+| `INTERNAL_API_KEY` | যেকোনো শক্তিশালী random string, যেমন: `lk_9f2xK8mPqR3wZ7nT` |
+
+> ⚠️ **সতর্কতা**: `serviceAccountKey.json` ফাইলটি কখনো GitHub-এ push করবে না।
+
+---
+
+## ধাপ ৪ — Flutter App-এ Backend URL ও API Key বসাও
+
+`lib/services/notification_service.dart` ফাইলে এই দুটো লাইন আপডেট করো:
 
 ```dart
-// 1. On app launch / token refresh — register the device
-Future<void> registerFcmToken(String userId) async {
-  final token = await FirebaseMessaging.instance.getToken();
-  if (token == null) return;
-
-  await http.post(
-    Uri.parse('https://your-server.com/save-token'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'user_id': userId, 'token': token}),
-  );
-}
-
-// 2. When sending a chat message — trigger the push
-Future<void> sendMessageNotification({
-  required String recipientId,
-  required String senderName,
-  required String messageText,
-  required String chatId,
-}) async {
-  await http.post(
-    Uri.parse('https://your-server.com/send-notification'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'user_id': recipientId,
-      'title': senderName,
-      'body': messageText,
-      'data': {'chat_id': chatId, 'type': 'new_message'},
-    }),
-  );
-}
+static const String _backendUrl =
+    'https://linkup-notification-backend.onrender.com'; // ← তোমার Render URL
+static const String _apiKey = 'lk_9f2xK8mPqR3wZ7nT'; // ← তোমার INTERNAL_API_KEY
 ```
 
 ---
 
-## 📝 Notes
+## ধাপ ৫ — chat_screen.dart-এ sendMessage call আপডেট করো
 
-| Topic | Detail |
-|---|---|
-| Storage | In-memory only — tokens reset on server restart. Swap `TokenStore` for Redis / PostgreSQL for persistence. |
-| Scalability | For multi-worker deployments replace the in-memory store with a shared cache (Redis recommended). |
-| Token rotation | FCM silently rotates tokens. Re-call `/save-token` in `FirebaseMessaging.instance.onTokenRefresh`. |
-| Security | Add bearer-token or API-key middleware before deploying publicly. |
+`chat_screen.dart`-এ যেখানে `sendMessage()` call করা হয়, সেখানে `senderName` parameter যোগ করো:
+
+```dart
+await _chatService.sendMessage(
+  senderId: widget.currentUid,
+  receiverId: widget.otherUser!.uid,
+  text: _msgCtrl.text,
+  senderName: myDisplayName,   // ← এটা যোগ করো (me.displayName)
+  // ...
+);
+```
+
+---
+
+## কীভাবে কাজ করে
+
+```
+User A message পাঠায়
+  ↓
+Flutter: ChatService.sendMessage()
+  ↓
+Firestore-এ message save হয়  +  NotificationService.sendMessageNotification() [fire-and-forget]
+  ↓
+FastAPI Backend (/send-notification)
+  ↓
+Firestore থেকে User B-এর fcmToken নেয়
+  ↓
+Firebase Admin SDK → FCM → User B-এর ডিভাইস
+  ↓
+User B background/killed app থাকলেও notification দেখায়
+```
+
+---
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Health check |
+| POST | `/register-token` | FCM token save করো |
+| POST | `/send-notification` | Push notification পাঠাও |
+
+সব POST request-এ header দিতে হবে: `x-api-key: YOUR_KEY`

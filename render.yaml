@@ -1,13 +1,12 @@
 services:
   - type: web
-    name: push-notification-backend
-    runtime: python
-    pythonVersion: "3.11"
-    buildCommand: pip install -r backend/requirements.txt
-    rootDir: .
-    startCommand: uvicorn backend.server:app --host 0.0.0.0 --port $PORT
+    name: linkup-notification-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
-        sync: false
-      - key: FCM_PROJECT_ID
-        sync: false
+        sync: false   # Set manually in Render dashboard (paste the full JSON)
+      - key: INTERNAL_API_KEY
+        sync: false   # Set manually in Render dashboard

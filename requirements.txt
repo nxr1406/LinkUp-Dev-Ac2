@@ -1,15 +1,4 @@
-# ── Web framework ─────────────────────────────────────────────────────────────
-fastapi==0.111.0
-uvicorn[standard]==0.29.0
-
-# ── HTTP client (async FCM calls) ─────────────────────────────────────────────
-httpx==0.27.0
-
-# ── Firebase / Google Auth ────────────────────────────────────────────────────
-google-auth==2.29.0
-
-# ── Data validation (pinned to pre-compiled wheel, avoids Rust/maturin build) ──
-pydantic==2.6.4
-
-# ── Environment variable loading ──────────────────────────────────────────────
-python-dotenv==1.0.1
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+firebase-admin==6.6.0
+pydantic==2.10.3
