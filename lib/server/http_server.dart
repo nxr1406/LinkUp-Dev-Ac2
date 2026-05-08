@@ -99,6 +99,7 @@ class LanHttpServer {
     bool clientDisconnected = false;
     req.response.done.then((_) => clientDisconnected = true).catchError((_) {
       clientDisconnected = true;
+      return true; // satisfy bool return type
     });
 
     await for (final frame in _frameStream!) {

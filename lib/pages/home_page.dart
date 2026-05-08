@@ -298,8 +298,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
             borderRadius: BorderRadius.circular(4),
             color: _serverRunning
-                ? const Color(0xFF00FF88).withOpacity(0.08)
-                : const Color(0xFFFF2D78).withOpacity(0.08),
+                ? const Color(0xFF00FF88).withValues(alpha: 0.08)
+                : const Color(0xFFFF2D78).withValues(alpha: 0.08),
           ),
           child: Center(
             child: _loading
@@ -334,9 +334,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFFF2D78).withOpacity(0.4)),
+        border: Border.all(color: const Color(0xFFFF2D78).withValues(alpha: 0.4)),
         borderRadius: BorderRadius.circular(4),
-        color: const Color(0xFFFF2D78).withOpacity(0.05),
+        color: const Color(0xFFFF2D78).withValues(alpha: 0.05),
       ),
       child: Row(
         children: [
